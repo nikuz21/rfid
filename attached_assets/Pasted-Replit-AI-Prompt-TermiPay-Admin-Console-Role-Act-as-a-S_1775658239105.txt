@@ -1,0 +1,43 @@
+Replit AI Prompt: TermiPay Admin Console
+Role: Act as a Senior Full-Stack Engineer.
+Goal: Build "TermiPay Admin Console," a web-based administrative dashboard for a transit fare collection system using a PostgreSQL database.
+
+Tech Stack: * Frontend: React with Tailwind CSS and Lucide-React icons.
+
+Backend: Node.js (Express).
+
+Database: PostgreSQL (managed via Replit's Database tool).
+
+Auth: Admin login/logout functionality with secure session management.
+
+Database Schema Requirements:
+
+Users: id, card_uid, full_name, contact_number, balance, gcash_loaded_total, status, created_at.
+
+Transactions: id, timestamp, card_uid, type (Fare/Top-up), amount, status.
+
+Routes: id, origin, destination, fare_amount, is_active.
+
+Core Features & Pages:
+
+Login Page: Simple, secure admin login. Redirect to Dashboard upon success.
+
+Dashboard: Display real-time stats: Total Revenue Today, Total Taps Today, Registered Cards, and Active Routes. Include a "Revenue Trend" line chart for the last 7 days.
+
+Card Registration: A form to register new RFID cards with fields for Card UID, Full Name, Contact Number, and Initial Balance. Include a "Recently Registered" table.
+
+Transaction Logs: A searchable, filterable table showing Timestamp, Card UID, Name, Type, Amount, and Status add actopn edit and delete.
+
+User Management: A summary of users and their GCash load history. Show a list of registered cardholders with their current balance add action edit and delete.
+
+Fare Matrix: A management interface for routes (e.g., Bugtong to Calbayog). Each route should have an "Activate" toggle and an "Edit Fare" option. add action edit and delete and add route buton 
+
+Reports: A section showing 7-day revenue analytics, average daily revenue, and total taps. Include a "Print PDF" button (mocked or functional).
+
+UI/UX Guidelines:
+
+Layout: Sidebar navigation (Dashboard, Card Registration, etc.) with a top header showing the current Date/Time, "Admin Angelo" profile, and a Logout button.
+
+Theme: Clean, professional white/gray background with blue accents. Use a responsive design.
+
+Data Handling: Ensure the frontend updates dynamically when cards are registered or routes are toggled.

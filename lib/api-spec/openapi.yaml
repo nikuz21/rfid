@@ -1,0 +1,671 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: TermiPay Admin Console API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: auth
+    description: Authentication
+  - name: users
+    description: User/cardholder management
+  - name: transactions
+    description: Transaction logs
+  - name: routes
+    description: Fare matrix / route management
+  - name: dashboard
+    description: Dashboard stats
+  - name: reports
+    description: Reports and analytics
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Admin login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginBody"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        "401":
+          description: Invalid credentials
+
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: Admin logout
+      responses:
+        "200":
+          description: Logged out
+
+  /auth/me:
+    get:
+      operationId: getMe
+      tags: [auth]
+      summary: Get current admin user
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminUser"
+        "401":
+          description: Not authenticated
+
+  /users:
+    get:
+      operationId: listUsers
+      tags: [users]
+      summary: List all registered cardholders
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+    post:
+      operationId: createUser
+      tags: [users]
+      summary: Register a new RFID card
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateUserBody"
+      responses:
+        "201":
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+  /users/{id}:
+    get:
+      operationId: getUser
+      tags: [users]
+      summary: Get a user by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: User details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "404":
+          description: User not found
+    patch:
+      operationId: updateUser
+      tags: [users]
+      summary: Update a user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateUserBody"
+      responses:
+        "200":
+          description: User updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "404":
+          description: User not found
+    delete:
+      operationId: deleteUser
+      tags: [users]
+      summary: Delete a user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: User deleted
+        "404":
+          description: User not found
+
+  /users/recent:
+    get:
+      operationId: listRecentUsers
+      tags: [users]
+      summary: Recently registered users
+      responses:
+        "200":
+          description: Recent users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+
+  /transactions:
+    get:
+      operationId: listTransactions
+      tags: [transactions]
+      summary: List transactions with filters
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [Fare, Top-up]
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [Success, Failed, Pending]
+      responses:
+        "200":
+          description: List of transactions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Transaction"
+    post:
+      operationId: createTransaction
+      tags: [transactions]
+      summary: Create a transaction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTransactionBody"
+      responses:
+        "201":
+          description: Transaction created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Transaction"
+
+  /transactions/{id}:
+    patch:
+      operationId: updateTransaction
+      tags: [transactions]
+      summary: Update a transaction
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateTransactionBody"
+      responses:
+        "200":
+          description: Transaction updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Transaction"
+        "404":
+          description: Transaction not found
+    delete:
+      operationId: deleteTransaction
+      tags: [transactions]
+      summary: Delete a transaction
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Transaction deleted
+        "404":
+          description: Transaction not found
+
+  /routes:
+    get:
+      operationId: listRoutes
+      tags: [routes]
+      summary: List all fare routes
+      responses:
+        "200":
+          description: List of routes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FareRoute"
+    post:
+      operationId: createRoute
+      tags: [routes]
+      summary: Add a new fare route
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateRouteBody"
+      responses:
+        "201":
+          description: Route created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FareRoute"
+
+  /routes/{id}:
+    patch:
+      operationId: updateRoute
+      tags: [routes]
+      summary: Update a fare route
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateRouteBody"
+      responses:
+        "200":
+          description: Route updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FareRoute"
+        "404":
+          description: Route not found
+    delete:
+      operationId: deleteRoute
+      tags: [routes]
+      summary: Delete a fare route
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Route deleted
+        "404":
+          description: Route not found
+
+  /routes/{id}/toggle:
+    patch:
+      operationId: toggleRoute
+      tags: [routes]
+      summary: Toggle active status of a route
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Route toggled
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FareRoute"
+        "404":
+          description: Route not found
+
+  /dashboard/stats:
+    get:
+      operationId: getDashboardStats
+      tags: [dashboard]
+      summary: Get dashboard summary stats
+      responses:
+        "200":
+          description: Dashboard stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardStats"
+
+  /dashboard/revenue-trend:
+    get:
+      operationId: getRevenueTrend
+      tags: [dashboard]
+      summary: Get 7-day revenue trend
+      responses:
+        "200":
+          description: Revenue trend data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RevenueTrendItem"
+
+  /reports/summary:
+    get:
+      operationId: getReportSummary
+      tags: [reports]
+      summary: Get report summary with 7-day analytics
+      responses:
+        "200":
+          description: Report summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReportSummary"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    LoginBody:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+      required:
+        - username
+        - password
+
+    LoginResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+      required:
+        - success
+        - message
+
+    AdminUser:
+      type: object
+      properties:
+        username:
+          type: string
+        name:
+          type: string
+      required:
+        - username
+        - name
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        cardUid:
+          type: string
+        fullName:
+          type: string
+        contactNumber:
+          type: string
+        balance:
+          type: number
+        gcashLoadedTotal:
+          type: number
+        status:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - cardUid
+        - fullName
+        - contactNumber
+        - balance
+        - gcashLoadedTotal
+        - status
+        - createdAt
+
+    CreateUserBody:
+      type: object
+      properties:
+        cardUid:
+          type: string
+        fullName:
+          type: string
+        contactNumber:
+          type: string
+        initialBalance:
+          type: number
+      required:
+        - cardUid
+        - fullName
+        - contactNumber
+        - initialBalance
+
+    UpdateUserBody:
+      type: object
+      properties:
+        fullName:
+          type: string
+        contactNumber:
+          type: string
+        balance:
+          type: number
+        status:
+          type: string
+
+    Transaction:
+      type: object
+      properties:
+        id:
+          type: integer
+        timestamp:
+          type: string
+          format: date-time
+        cardUid:
+          type: string
+        fullName:
+          type: string
+        type:
+          type: string
+        amount:
+          type: number
+        status:
+          type: string
+      required:
+        - id
+        - timestamp
+        - cardUid
+        - fullName
+        - type
+        - amount
+        - status
+
+    CreateTransactionBody:
+      type: object
+      properties:
+        cardUid:
+          type: string
+        type:
+          type: string
+          enum: [Fare, Top-up]
+        amount:
+          type: number
+        status:
+          type: string
+          enum: [Success, Failed, Pending]
+      required:
+        - cardUid
+        - type
+        - amount
+        - status
+
+    UpdateTransactionBody:
+      type: object
+      properties:
+        type:
+          type: string
+        amount:
+          type: number
+        status:
+          type: string
+
+    FareRoute:
+      type: object
+      properties:
+        id:
+          type: integer
+        origin:
+          type: string
+        destination:
+          type: string
+        fareAmount:
+          type: number
+        isActive:
+          type: boolean
+      required:
+        - id
+        - origin
+        - destination
+        - fareAmount
+        - isActive
+
+    CreateRouteBody:
+      type: object
+      properties:
+        origin:
+          type: string
+        destination:
+          type: string
+        fareAmount:
+          type: number
+      required:
+        - origin
+        - destination
+        - fareAmount
+
+    UpdateRouteBody:
+      type: object
+      properties:
+        origin:
+          type: string
+        destination:
+          type: string
+        fareAmount:
+          type: number
+        isActive:
+          type: boolean
+
+    DashboardStats:
+      type: object
+      properties:
+        totalRevenueToday:
+          type: number
+        totalTapsToday:
+          type: integer
+        registeredCards:
+          type: integer
+        activeRoutes:
+          type: integer
+      required:
+        - totalRevenueToday
+        - totalTapsToday
+        - registeredCards
+        - activeRoutes
+
+    RevenueTrendItem:
+      type: object
+      properties:
+        date:
+          type: string
+        revenue:
+          type: number
+      required:
+        - date
+        - revenue
+
+    ReportSummary:
+      type: object
+      properties:
+        totalRevenue7Days:
+          type: number
+        averageDailyRevenue:
+          type: number
+        totalTaps7Days:
+          type: integer
+        dailyBreakdown:
+          type: array
+          items:
+            $ref: "#/components/schemas/RevenueTrendItem"
+      required:
+        - totalRevenue7Days
+        - averageDailyRevenue
+        - totalTaps7Days
+        - dailyBreakdown
