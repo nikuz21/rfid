@@ -1,29 +1,21 @@
 {
-  "version": 2,
-  "builds": [
-    {
-      "src": "api/[...path].ts",
-      "use": "@vercel/node"
-    },
-    {
-      "src": "artifacts/termipay/package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "dist/public"
-      }
+  "framework": "vite",
+  "installCommand": "pnpm install --frozen-lockfile",
+  "buildCommand": "pnpm --filter @workspace/termipay run build",
+  "outputDirectory": "artifacts/termipay/dist/public",
+  "functions": {
+    "api/**/*.ts": {
+      "runtime": "nodejs20.x"
     }
-  ],
-  "routes": [
+  },
+  "rewrites": [
     {
-      "src": "/api/(.*)",
-      "dest": "/api/[...path].ts"
+      "source": "/api/:path*",
+      "destination": "/api/:path*"
     },
     {
-      "handle": "filesystem"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
+      "source": "/:path*",
+      "destination": "/index.html"
     }
   ]
 }
