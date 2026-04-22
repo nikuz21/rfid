@@ -2,7 +2,7 @@
   "framework": "vite",
   "installCommand": "pnpm install --frozen-lockfile",
   "buildCommand": "pnpm --filter @workspace/termipay run build",
-  "outputDirectory": "dist/public",
+  "outputDirectory": "dist",
   "functions": {
     "api/**/*.ts": {
       "runtime": "nodejs20.x"
@@ -10,11 +10,7 @@
   },
   "rewrites": [
     {
-      "source": "/api/:path*",
-      "destination": "/api/:path*"
-    },
-    {
-      "source": "/:path*",
+      "source": "/(.*)",
       "destination": "/index.html"
     }
   ]
