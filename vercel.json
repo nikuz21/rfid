@@ -1,14 +1,14 @@
 {
-  "$schema": "https://vercel.sh",
-  "version": 2,
+  "framework": "vite",
   "installCommand": "pnpm install --frozen-lockfile",
   "buildCommand": "pnpm --filter @workspace/termipay run build",
-  "outputDirectory": "artifacts/termipay/dist/public",
+  "outputDirectory": "dist",
+  "functions": {
+    "api/**/*.ts": {
+      "runtime": "nodejs20.x"
+    }
+  },
   "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "/artifacts/api-server/src/index.ts"
-    },
     {
       "source": "/(.*)",
       "destination": "/index.html"
